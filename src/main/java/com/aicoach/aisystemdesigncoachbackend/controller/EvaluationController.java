@@ -1,6 +1,8 @@
 package com.aicoach.aisystemdesigncoachbackend.controller;
 
 import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationRequest;
+import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationResponse;
+import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationResult;
 import com.aicoach.aisystemdesigncoachbackend.service.GeminiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,10 +22,12 @@ public class EvaluationController {
     }
 
     @PostMapping("/evaluate")
-    public String evaluate(@RequestBody EvaluationRequest request){
-        return geminiService.evaluate(
+    public EvaluationResponse evaluate(@RequestBody EvaluationRequest request){
+        EvaluationResult feedback= geminiService.evaluate(
                 request.getQuestion(),
                 request.getAnswer());
+
+        return new EvaluationResponse(feedback);
     }
 
 }

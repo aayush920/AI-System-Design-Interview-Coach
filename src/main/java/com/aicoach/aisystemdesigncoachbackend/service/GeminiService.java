@@ -1,10 +1,8 @@
 package com.aicoach.aisystemdesigncoachbackend.service;
 
 import com.aicoach.aisystemdesigncoachbackend.config.GeminiConfig;
-import com.aicoach.aisystemdesigncoachbackend.dto.GeminiPart;
-import com.aicoach.aisystemdesigncoachbackend.dto.GeminiRequest;
-import com.aicoach.aisystemdesigncoachbackend.dto.GeminiRequestContent;
-import com.aicoach.aisystemdesigncoachbackend.dto.GeminiResponse;
+import com.aicoach.aisystemdesigncoachbackend.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -17,11 +15,13 @@ public class GeminiService {
 
     private final GeminiConfig geminiConfig;
     private final RestClient restClient;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public GeminiService(GeminiConfig geminiConfig){
+    public GeminiService(GeminiConfig geminiConfig, ObjectMapper objectMapper){
         this.geminiConfig=geminiConfig;
         this.restClient= RestClient.create();
+        this.objectMapper=objectMapper;
     }
 
     /**
@@ -31,7 +31,7 @@ public class GeminiService {
      * @param answer - answer provided by the user
      * @return - extracted Gemini response for the prompt given
      */
-    public String evaluate(String question, String answer){
+    public EvaluationResult evaluate(String question, String answer){
 
         try{
             String prompt= buildPrompt(question,answer);
@@ -63,12 +63,15 @@ public class GeminiService {
 
             validateResponse(response);
 
-            return response.getCandidates()
-                    .getFirst()
-                    .getContent()
-                    .getParts()
-                    .getFirst()
-                    .getText();
+            String json=
+                    response.getCandidates()
+                            .getFirst()
+                            .getContent()
+                            .getParts()
+                            .getFirst()
+                            .getText();
+
+            return objectMapper.readValue(json, EvaluationResult.class);
 
         } catch(Exception e){
             throw new RuntimeException(
@@ -111,12 +114,18 @@ public class GeminiService {
             Candidate Answer:
             %s
 
-            Evaluate the answer.
+            Evaluate the answer and return only valid JSON.
+            No Markdown.
+            No explanation.
+            Only JSON
 
             Return:
-            1. Strengths
-            2. Missing Points
-            3. Score out of 10
+            {
+                "score": 0,
+                "strengths": [],
+                "missingPoints": [],
+                "nextSteps":[]
+            }
 
             Keep the response under 200 words.
             """.formatted(question, answer);

@@ -1,7 +1,9 @@
 package com.aicoach.aisystemdesigncoachbackend.dto;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Data
 public class EvaluationRequest {
 
     private String question;
@@ -11,21 +13,5 @@ public class EvaluationRequest {
     public EvaluationRequest(String question, String answer){
         this.question=question;
         this.answer=answer;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public String getAnswer() {
-        return answer;
-    }
-
-    public void setAnswer(String answer) {
-        this.answer = answer;
     }
 }
