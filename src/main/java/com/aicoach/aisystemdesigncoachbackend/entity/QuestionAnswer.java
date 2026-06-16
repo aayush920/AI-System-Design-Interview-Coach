@@ -1,5 +1,7 @@
 package com.aicoach.aisystemdesigncoachbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,10 +28,12 @@ public class QuestionAnswer {
     @Column(columnDefinition="TEXT")
     private String answer;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name="interview_session_id")
     private InterviewSession interviewSession;
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "questionAnswer")
     private Evaluation evaluation;
 

@@ -1,5 +1,6 @@
 package com.aicoach.aisystemdesigncoachbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class InterviewSession {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @JsonManagedReference
     @OneToMany(mappedBy="interviewSession")
     private List<QuestionAnswer> questionsAnswers;
 

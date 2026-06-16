@@ -1,5 +1,6 @@
 package com.aicoach.aisystemdesigncoachbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class Evaluation {
     @Column(columnDefinition = "TEXT")
     private String nextSteps;
 
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "question_answer_id")
     private QuestionAnswer questionAnswer;

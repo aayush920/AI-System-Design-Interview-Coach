@@ -10,6 +10,7 @@ import com.aicoach.aisystemdesigncoachbackend.repository.QuestionAnswerRepositor
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class InterviewService {
@@ -51,6 +52,12 @@ public class InterviewService {
         QuestionAnswer questionAnswer=questionAnswerRepository.findById(questionAnswerId).orElseThrow();
 
         EvaluationResult result= geminiService.evaluate(questionAnswer.getQuestion(), questionAnswer.getAnswer());
+
+        Optional<Evaluation> existingEvaluation = evaluationRepository.findByQuestionAnswerId(questionAnswerId);
+        if(existingEvaluation.isPresent()){
+            System.out.println("Evaluation Already exists");
+            return existingEvaluation.get();
+        }
 
         Evaluation evaluation= new Evaluation();
 
