@@ -3,31 +3,27 @@ package com.aicoach.aisystemdesigncoachbackend.controller;
 import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationRequest;
 import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationResponse;
 import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationResult;
+import com.aicoach.aisystemdesigncoachbackend.entity.Evaluation;
 import com.aicoach.aisystemdesigncoachbackend.service.GeminiService;
+import com.aicoach.aisystemdesigncoachbackend.service.InterviewService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/evaluations")
 public class EvaluationController {
 
-    private final GeminiService geminiService;
+    private final InterviewService interviewService;
 
     @Autowired
-    public EvaluationController(GeminiService geminiService){
-        this.geminiService=geminiService;
+    public EvaluationController(InterviewService interviewService){
+        this.interviewService=interviewService;
     }
 
-    @PostMapping("/evaluate")
-    public EvaluationResponse evaluate(@RequestBody EvaluationRequest request){
-        EvaluationResult feedback= geminiService.evaluate(
-                request.getQuestion(),
-                request.getAnswer());
+    @PostMapping("/{questionAnswerId}")
+    public Evaluation evaluate(@PathVariable Long questionAnswerId){
 
-        return new EvaluationResponse(feedback);
+        return interviewService.evaluateQuestionAnswer(questionAnswerId);
     }
 
 }

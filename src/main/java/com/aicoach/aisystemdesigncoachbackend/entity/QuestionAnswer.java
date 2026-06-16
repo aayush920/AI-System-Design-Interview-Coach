@@ -30,4 +30,7 @@ public class QuestionAnswer {
     @JoinColumn(name="interview_session_id")
     private InterviewSession interviewSession;
 
+    @OneToOne(mappedBy = "questionAnswer")
+    private Evaluation evaluation;
+
 }
