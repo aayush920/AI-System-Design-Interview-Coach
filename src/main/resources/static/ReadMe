@@ -1,253 +1,34 @@
-# AI System Design Coach
+After Milestone 2.5
 
-An AI-powered backend application that simulates system design interviews, evaluates candidate answers using Gemini, and stores interview history for future analysis.
-
-## Features
-
-### Interview Management
-
-* Create interview sessions
-* Track interview topics
-* Persist interview history
-
-### Question & Answer Management
-
-* Store system design questions
-* Store candidate answers
-* Associate questions with interview sessions
-
-### AI Evaluation
-
-* Evaluate answers using Gemini
-* Generate structured feedback
-* Provide scores, strengths, missing points, and next steps
-
-### Persistence
-
-* PostgreSQL database
-* Hibernate/JPA entity mapping
-* Repository pattern for data access
-
----
-
-## Tech Stack
-
-### Backend
-
-* Java 21
-* Spring Boot
-* Spring Data JPA
-* Hibernate
-
-### Database
-
-* PostgreSQL
-
-### AI
-
-* Gemini API
-
-### Build Tool
-
-* Maven
-
----
-
-## Architecture
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-PostgreSQL
-```
-
-### Components
-
-```text
+GET /api/interviews/1/history
+            ↓
 InterviewController
-EvaluationController
-
+            ↓
 InterviewService
-GeminiService
-
-InterviewSessionRepository
-QuestionAnswerRepository
-EvaluationRepository
-```
-
----
-
-## Database Design
-
-### InterviewSession
-
-```text
-id
-topic
-created_at
-```
-
-### QuestionAnswer
-
-```text
-id
-question
-answer
-interview_session_id
-```
-
-### Evaluation
-
-```text
-id
-score
-strengths
-missing_points
-next_steps
-question_answer_id
-```
-
-### Relationships
-
-```text
+            ↓
 InterviewSession
-       |
-       | 1
-       |
-       | *
-QuestionAnswer
-       |
-       | 1
-       |
-       | 1
-Evaluation
-```
+            ↓
+QuestionAnswers
+            ↓
+Evaluations
+            ↓
+DTO Mapping
+            ↓
+Response
+                 ┌──────────────────┐
+                 │ InterviewSession │
+                 └─────────┬────────┘
+                           │ 1
+                           │
+                           ▼ *
+                 ┌──────────────────┐
+                 │ QuestionAnswer   │
+                 └─────────┬────────┘
+                           │ 1
+                           │
+                           ▼ 1
+                 ┌──────────────────┐
+                 │   Evaluation     │
+                 └──────────────────┘
 
----
 
-## API Endpoints
-
-### Create Interview
-
-```http
-POST /api/interviews/createInterview
-```
-
-Request
-
-```json
-{
-  "topic": "Distributed Cache"
-}
-```
-
----
-
-### Add Question & Answer
-
-```http
-POST /api/interviews/{interviewId}/questions
-```
-
-Request
-
-```json
-{
-  "question": "Design Redis",
-  "answer": "Use replication"
-}
-```
-
----
-
-### Evaluate Answer
-
-```http
-POST /api/evaluations/{questionAnswerId}
-```
-
-Generates AI feedback and stores the evaluation.
-
----
-
-## Evaluation Flow
-
-```text
-QuestionAnswer
-        ↓
-Gemini Service
-        ↓
-Gemini API
-        ↓
-Evaluation Result
-        ↓
-Evaluation Entity
-        ↓
-PostgreSQL
-```
-
----
-
-## Project Structure
-
-```text
-src/main/java/com/aicoach/aisystemdesigncoachbackend
-
-├── config
-│   └── GeminiConfig
-│
-├── controller
-│   ├── InterviewController
-│   └── EvaluationController
-│
-├── dto
-│
-├── entity
-│   ├── InterviewSession
-│   ├── QuestionAnswer
-│   └── Evaluation
-│
-├── repository
-│   ├── InterviewSessionRepository
-│   ├── QuestionAnswerRepository
-│   └── EvaluationRepository
-│
-├── service
-│   ├── InterviewService
-│   └── GeminiService
-│
-└── AiSystemDesignCoachBackendApplication
-```
-
----
-
-## Current Progress
-
-### Milestone 1
-
-* Gemini API Integration
-* Structured Evaluation Response
-
-### Milestone 2
-
-* PostgreSQL Integration
-* JPA/Hibernate Setup
-* InterviewSession Persistence
-* QuestionAnswer Persistence
-* Evaluation Persistence
-* Entity Relationships
-
-### Upcoming
-
-* Evaluation History APIs
-* Progress Tracking
-* Analytics Dashboard
-* Authentication & User Management
-* Retrieval Augmented Generation (RAG)
-
-```
-```

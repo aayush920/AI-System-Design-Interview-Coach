@@ -1,6 +1,6 @@
 package com.aicoach.aisystemdesigncoachbackend.service;
 
-import com.aicoach.aisystemdesigncoachbackend.dto.EvaluationResult;
+import com.aicoach.aisystemdesigncoachbackend.dto.*;
 import com.aicoach.aisystemdesigncoachbackend.entity.Evaluation;
 import com.aicoach.aisystemdesigncoachbackend.entity.InterviewSession;
 import com.aicoach.aisystemdesigncoachbackend.entity.QuestionAnswer;
@@ -10,6 +10,8 @@ import com.aicoach.aisystemdesigncoachbackend.repository.QuestionAnswerRepositor
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -68,6 +70,60 @@ public class InterviewService {
         evaluation.setNextSteps(String.join("\n", result.getNextSteps()));
 
         return evaluationRepository.save(evaluation);
+    }
+
+    public List<InterviewSummaryResponse> getAllInterviews(){
+
+        return interviewSessionRepository
+                .findAll()
+                .stream()
+                .map(interviewSession ->
+                        new InterviewSummaryResponse(interviewSession.getId(), interviewSession.getTopic()))
+                .toList();
+    }
+
+    public InterviewDetailResponse getInterviewDetails(Long interviewId){
+        return interviewSessionRepository
+                .findById(interviewId)
+                .map(interviewSession ->
+                        new InterviewDetailResponse(
+                                interviewSession.getId(),
+                                interviewSession.getTopic(),
+                                interviewSession.getQuestionsAnswers()
+                                        .stream()
+                                        .map(questionAnswer ->
+                                                new QuestionAnswerResponse(
+                                                        questionAnswer.getId(),
+                                                        questionAnswer.getQuestion(),
+                                                        questionAnswer.getAnswer()
+                                                ))
+                                        .toList()
+                        )
+                ).orElseThrow(()-> new NoSuchElementException("Interview not found with id- "+ interviewId));
+    }
+
+    public InterviewHistoryResponse getInterviewHistory(Long interviewId){
+        InterviewSession interviewSession= interviewSessionRepository
+                .findById(interviewId)
+                .orElseThrow(()-> new NoSuchElementException("Interview not found with id- "+ interviewId));
+
+        List<EvaluationHistoryItem> evaluationHistoryItemList=interviewSession
+                .getQuestionsAnswers()
+                .stream()
+                .filter(qa -> qa.getEvaluation() != null)
+                .map(qa ->
+                        new EvaluationHistoryItem(
+                                qa.getQuestion(),
+                                qa.getEvaluation().getScore(),
+                                qa.getEvaluation().getStrengths(),
+                                qa.getEvaluation().getMissingPoints(),
+                                qa.getEvaluation().getNextSteps()
+                        ))
+                .toList();
+
+        System.out.println(evaluationHistoryItemList);
+        return new InterviewHistoryResponse(interviewId, evaluationHistoryItemList);
+
     }
 
 }
