@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,9 +15,9 @@ public class EvaluationHistoryItem {
 
     private Integer score;
 
-    private String strengths;
+    private List<String> strengths;
 
-    private String missingPoints;
+    private List<String> missingPoints;
 
-    private String nextSteps;
+    private List<String> nextSteps;
 }

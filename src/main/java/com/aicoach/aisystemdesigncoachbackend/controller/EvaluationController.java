@@ -21,7 +21,7 @@ public class EvaluationController {
     }
 
     @PostMapping("/{questionAnswerId}")
-    public Evaluation evaluate(@PathVariable Long questionAnswerId){
+    public EvaluationResult evaluate(@PathVariable Long questionAnswerId){
 
         return interviewService.evaluateQuestionAnswer(questionAnswerId);
     }

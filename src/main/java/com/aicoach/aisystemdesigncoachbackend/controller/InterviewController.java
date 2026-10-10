@@ -19,12 +19,12 @@ public class InterviewController {
     }
 
     @PostMapping("/createInterview")
-    public InterviewSession createInterview(@RequestBody CreateInterviewRequest request){
+    public InterviewSummaryResponse createInterview(@RequestBody CreateInterviewRequest request){
         return interviewService.createInterview(request.getTopic());
     }
 
     @PostMapping("/{id}/questions")
-    public QuestionAnswer addQuestionAnswer(@PathVariable Long id, @RequestBody CreateQuestionAnswerRequest request){
+    public QuestionAnswerResponse addQuestionAnswer(@PathVariable Long id, @RequestBody CreateQuestionAnswerRequest request){
         return interviewService.addQuestionAnswer(
                 id,
                 request.getQuestion(),
@@ -45,6 +45,19 @@ public class InterviewController {
     @GetMapping("/{id}/history")
     public InterviewHistoryResponse getInterviewHistory(@PathVariable Long id){
         return interviewService.getInterviewHistory(id);
+    }
+
+    @PostMapping("/{id}/generateQuestion")
+    public QuestionAnswerResponse getInterviewQuestion(@PathVariable Long id){
+        return interviewService.getInterviewQuestion(id);
+    }
+
+    @PatchMapping("/questions/{questionAnswerId}/answer")
+    public QuestionAnswerResponse updateQuestionAnswer(
+            @PathVariable Long questionAnswerId,
+            @RequestBody UpdateAnswerRequest request
+    ){
+        return interviewService.updateQuestionAnswer(questionAnswerId, request.getAnswer());
     }
 
 

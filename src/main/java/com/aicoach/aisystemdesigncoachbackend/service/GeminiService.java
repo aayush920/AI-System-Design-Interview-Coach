@@ -31,11 +31,10 @@ public class GeminiService {
      * @param answer - answer provided by the user
      * @return - extracted Gemini response for the prompt given
      */
-    public EvaluationResult evaluate(String question, String answer){
+    public EvaluationResult evaluateQuestionAnswer(String question, String answer){
 
         try{
-            String prompt= buildPrompt(question,answer);
-
+            String prompt= buildQuestionAnswerPrompt(question,answer);
 
             GeminiRequest request=
                     new GeminiRequest(
@@ -103,7 +102,7 @@ public class GeminiService {
         }
     }
 
-    private String buildPrompt(String question, String answer) {
+    private String buildQuestionAnswerPrompt(String question, String answer) {
 
         return """
             You are a senior system design interviewer.
@@ -129,5 +128,56 @@ public class GeminiService {
 
             Keep the response under 200 words.
             """.formatted(question, answer);
+    }
+
+    private String buildGenerateQuestionPrompt(String topic) {
+        return """
+            Generate exactly one system design interview question
+            about the following topic: %s
+
+            Return only the question text.
+            Do not include an answer, explanation, or numbering.
+            """.formatted(topic);
+    }
+
+    public String generateQuestion(String topic) {
+        try {
+            String prompt = buildGenerateQuestionPrompt(topic);
+            GeminiRequest request = new GeminiRequest(
+                    List.of(
+                            new GeminiRequestContent(
+                                    List.of(new GeminiPart(prompt))
+                            )
+                    )
+            );
+
+            String geminiUrl = geminiConfig.getApiUrl()
+                    + "?key="
+                    + geminiConfig.getApiKey();
+
+            GeminiResponse response = restClient.post()
+                    .uri(geminiUrl)
+                    .body(request)
+                    .retrieve()
+                    .body(GeminiResponse.class);
+
+            validateResponse(response);
+
+            String question = response.getCandidates()
+                    .getFirst()
+                    .getContent()
+                    .getParts()
+                    .getFirst()
+                    .getText();
+
+            if (question == null || question.isBlank()) {
+                throw new RuntimeException("Gemini returned an empty question");
+            }
+
+            return question.trim();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate question using Gemini", e);
+        }
     }
 }

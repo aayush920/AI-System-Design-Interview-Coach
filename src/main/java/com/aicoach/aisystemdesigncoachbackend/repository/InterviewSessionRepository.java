@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface InterviewSessionRepository extends JpaRepository<InterviewSession,Long> {
 
-    @EntityGraph(attributePaths = {"questionsAnswers"})
+    @EntityGraph(attributePaths = {"questionsAnswers", "questionsAnswers.evaluation"})
     @NonNull
     Optional<InterviewSession> findById(@NonNull Long id);
 }

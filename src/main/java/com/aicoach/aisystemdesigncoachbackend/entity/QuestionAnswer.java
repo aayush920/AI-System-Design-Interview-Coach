@@ -22,18 +22,16 @@ public class QuestionAnswer {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable=false, columnDefinition="TEXT")
     private String question;
 
     @Column(columnDefinition="TEXT")
     private String answer;
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name="interview_session_id")
     private InterviewSession interviewSession;
 
-    @JsonManagedReference
     @OneToOne(mappedBy = "questionAnswer")
     private Evaluation evaluation;
 
