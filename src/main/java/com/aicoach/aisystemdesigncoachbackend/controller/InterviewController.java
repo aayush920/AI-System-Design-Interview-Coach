@@ -60,5 +60,10 @@ public class InterviewController {
         return interviewService.updateQuestionAnswer(questionAnswerId, request.getAnswer());
     }
 
+    @PostMapping("/questions/{questionAnswerId}/follow-up")
+    public QuestionAnswerResponse generateFollowUpQuestion(@PathVariable Long questionAnswerId){
+        return interviewService.generateFollowUpQuestion(questionAnswerId);
+    }
+
 
 }

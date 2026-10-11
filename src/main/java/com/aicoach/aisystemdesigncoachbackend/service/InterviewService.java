@@ -7,6 +7,9 @@ import com.aicoach.aisystemdesigncoachbackend.entity.QuestionAnswer;
 import com.aicoach.aisystemdesigncoachbackend.repository.EvaluationRepository;
 import com.aicoach.aisystemdesigncoachbackend.repository.InterviewSessionRepository;
 import com.aicoach.aisystemdesigncoachbackend.repository.QuestionAnswerRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -57,11 +60,17 @@ public class InterviewService {
         return new QuestionAnswerResponse(questionAnswer.getId(),questionAnswer.getQuestion(),questionAnswer.getAnswer());
     }
 
+    @Transactional
     public QuestionAnswerResponse updateQuestionAnswer(Long questionAnswerId, String answer){
         QuestionAnswer questionAnswer = questionAnswerRepository.findById(questionAnswerId)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Question and answer not found with id- " + questionAnswerId
                 ));
+
+        evaluationRepository.findByQuestionAnswerId(questionAnswerId).ifPresent(evaluation -> {
+            questionAnswer.setEvaluation(null);
+            evaluationRepository.delete(evaluation);
+        });
 
         questionAnswer.setAnswer(answer);
         QuestionAnswer savedQuestionAnswer = questionAnswerRepository.save(questionAnswer);
@@ -70,6 +79,51 @@ public class InterviewService {
                 savedQuestionAnswer.getId(),
                 savedQuestionAnswer.getQuestion(),
                 savedQuestionAnswer.getAnswer()
+        );
+    }
+
+    @Transactional
+    public QuestionAnswerResponse generateFollowUpQuestion(Long questionAnswerId){
+        QuestionAnswer sourceQuestionAnswer = questionAnswerRepository.findById(questionAnswerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Question and answer not found with id- " + questionAnswerId
+                ));
+
+        if (sourceQuestionAnswer.getAnswer() == null || sourceQuestionAnswer.getAnswer().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Submit an answer before requesting a follow-up question");
+        }
+
+        Evaluation evaluation = evaluationRepository.findByQuestionAnswerId(questionAnswerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Evaluate this answer before requesting a follow-up question"
+                ));
+
+        EvaluationResult evaluationContext = new EvaluationResult(
+                evaluation.getScore(),
+                evaluation.getStrengths(),
+                evaluation.getMissingPoints(),
+                evaluation.getNextSteps()
+        );
+
+        String followUpQuestion = geminiService.generateFollowUpQuestion(
+                sourceQuestionAnswer.getInterviewSession().getTopic(),
+                sourceQuestionAnswer.getQuestion(),
+                sourceQuestionAnswer.getAnswer(),
+                evaluationContext
+        );
+
+        QuestionAnswer followUp = new QuestionAnswer();
+        followUp.setQuestion(followUpQuestion);
+        followUp.setInterviewSession(sourceQuestionAnswer.getInterviewSession());
+        followUp.setParentQuestionAnswer(sourceQuestionAnswer);
+
+        QuestionAnswer savedFollowUp = questionAnswerRepository.save(followUp);
+        return new QuestionAnswerResponse(
+                savedFollowUp.getId(),
+                savedFollowUp.getQuestion(),
+                savedFollowUp.getAnswer()
         );
     }
 

@@ -35,4 +35,8 @@ public class QuestionAnswer {
     @OneToOne(mappedBy = "questionAnswer")
     private Evaluation evaluation;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_question_answer_id")
+    private QuestionAnswer parentQuestionAnswer;
+
 }
